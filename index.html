@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>오늘 공부할 시간</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDEFE4;
+    --paper-raised:#F6F7EE;
+    --ink:#26312B;
+    --muted:#6C7268;
+    --line:#D6D4BF;
+    --teal:#3E7C6E;
+    --teal-dark:#2C5C51;
+    --coral:#D9694F;
+    --coral-soft:#F3D9CE;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Noto Sans KR', sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width:640px;
+    margin:0 auto;
+    padding:48px 24px 80px;
+  }
+  header{
+    margin-bottom:36px;
+  }
+  h1{
+    font-family:'Noto Serif KR', serif;
+    font-weight:700;
+    font-size:34px;
+    margin:0 0 10px;
+    letter-spacing:-0.01em;
+  }
+  .sub{
+    color:var(--muted);
+    font-size:15px;
+    max-width:44ch;
+  }
+  .card{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:24px;
+    margin-bottom:20px;
+  }
+  .card h2{
+    font-family:'Noto Serif KR', serif;
+    font-size:18px;
+    font-weight:500;
+    margin:0 0 18px;
+    color:var(--teal-dark);
+  }
+  .row{
+    display:flex;
+    gap:14px;
+    margin-bottom:14px;
+    flex-wrap:wrap;
+  }
+  .field{
+    flex:1;
+    min-width:130px;
+  }
+  .field label{
+    display:block;
+    font-size:13px;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+  input[type="time"], input[type="text"], input[type="number"], select{
+    width:100%;
+    padding:10px 12px;
+    border:1px solid var(--line);
+    border-radius:3px;
+    background:#fff;
+    font-family:inherit;
+    font-size:15px;
+    color:var(--ink);
+  }
+  input:focus, select:focus, button:focus{
+    outline:2px solid var(--teal);
+    outline-offset:1px;
+  }
+  .task-add{
+    display:flex;
+    gap:10px;
+    align-items:flex-end;
+    margin-top:4px;
+  }
+  .task-add .field{flex:2;}
+  .task-add .field.mins{flex:1; min-width:90px;}
+  button{
+    font-family:inherit;
+    font-size:14px;
+    cursor:pointer;
+    border:none;
+    border-radius:3px;
+  }
+  .btn-add{
+    background:var(--teal);
+    color:#fff;
+    padding:10px 16px;
+    white-space:nowrap;
+  }
+  .btn-add:hover{background:var(--teal-dark);}
+  ul.tasks{
+    list-style:none;
+    margin:16px 0 0;
+    padding:0;
+  }
+  ul.tasks li{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 0;
+    border-bottom:1px solid var(--line);
+    font-size:15px;
+  }
+  ul.tasks li:last-child{border-bottom:none;}
+  ul.tasks .t-name{flex:1;}
+  ul.tasks .t-min{color:var(--muted); margin:0 14px; font-variant-numeric:tabular-nums;}
+  .del{
+    background:none;
+    color:var(--muted);
+    font-size:13px;
+    padding:4px 8px;
+  }
+  .del:hover{color:var(--coral);}
+  .empty-note{color:var(--muted); font-size:14px; padding:6px 0;}
+  .btn-main{
+    width:100%;
+    background:var(--ink);
+    color:var(--paper-raised);
+    padding:14px;
+    font-size:16px;
+    font-weight:500;
+    border-radius:3px;
+    margin-top:6px;
+  }
+  .btn-main:hover{background:var(--teal-dark);}
+  .btn-main:disabled{background:var(--line); color:var(--muted); cursor:not-allowed;}
+
+  /* schedule */
+  #scheduleSection{display:none;}
+  .warning{
+    background:var(--coral-soft);
+    border:1px solid var(--coral);
+    color:#7A3722;
+    padding:14px 16px;
+    border-radius:3px;
+    font-size:14px;
+    margin-bottom:16px;
+  }
+  .summary{
+    display:flex;
+    gap:22px;
+    margin-bottom:18px;
+    font-size:14px;
+    color:var(--muted);
+    flex-wrap:wrap;
+  }
+  .summary b{color:var(--ink); font-variant-numeric:tabular-nums;}
+  .timeline{
+    background:
+      repeating-linear-gradient(
+        to bottom,
+        transparent, transparent 42px,
+        var(--line) 42px, var(--line) 43px
+      );
+    padding-top:1px;
+  }
+  .block{
+    display:flex;
+    align-items:baseline;
+    height:42px;
+    padding:0 4px;
+    position:relative;
+  }
+  .block .time{
+    width:100px;
+    flex-shrink:0;
+    font-size:13px;
+    color:var(--muted);
+    font-variant-numeric:tabular-nums;
+  }
+  .block .label{
+    font-size:15px;
+  }
+  .block.study .label{font-weight:500;}
+  .block.break .label{color:var(--muted); font-style:normal;}
+  .block.break .time{color:#A9AC9C;}
+  .block.now{
+    background:rgba(62,124,110,0.10);
+    border-radius:3px;
+  }
+  .block.now .time{color:var(--teal-dark); font-weight:700;}
+  .block.now::before{
+    content:"";
+    position:absolute;
+    left:-24px;
+    top:50%;
+    transform:translateY(-50%);
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:var(--coral);
+  }
+
+  /* now playing */
+  #nowSection{display:none;}
+  .now-card{
+    background:var(--teal-dark);
+    color:#fff;
+    border-radius:4px;
+    padding:26px 24px;
+  }
+  .now-card .eyebrow{
+    font-size:13px;
+    color:#B9D6CD;
+    margin-bottom:6px;
+  }
+  .now-card .now-label{
+    font-family:'Noto Serif KR', serif;
+    font-size:24px;
+    font-weight:700;
+    margin-bottom:16px;
+  }
+  .progress-track{
+    height:6px;
+    background:rgba(255,255,255,0.22);
+    border-radius:3px;
+    overflow:hidden;
+    margin-bottom:10px;
+  }
+  .progress-fill{
+    height:100%;
+    background:#fff;
+    width:0%;
+    transition:width 1s linear;
+  }
+  .now-meta{
+    display:flex;
+    justify-content:space-between;
+    font-size:13px;
+    color:#D8E8E3;
+  }
+  .reset-link{
+    display:inline-block;
+    margin-top:28px;
+    color:var(--muted);
+    font-size:13px;
+    text-decoration:underline;
+    cursor:pointer;
+    background:none;
+    padding:0;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>오늘 공부할 시간</h1>
+    <p class="sub">할 일과 걸릴 시간을 적으면, 쉬는 시간을 사이에 넣어 취침 시간 안에 끝나는 시간표를 짜드려요.</p>
+  </header>
+
+  <div class="card" id="setupCard">
+    <h2>오늘 계획</h2>
+    <div class="row">
+      <div class="field">
+        <label for="startTime">지금 몇 시에 시작해요?</label>
+        <input type="time" id="startTime">
+      </div>
+      <div class="field">
+        <label for="bedTime">몇 시까지 자고 싶어요?</label>
+        <input type="time" id="bedTime" value="23:00">
+      </div>
+      <div class="field">
+        <label for="blockLen">한 번에 집중할 시간</label>
+        <select id="blockLen">
+          <option value="25">25분 (짧게 자주)</option>
+          <option value="40" selected>40분</option>
+          <option value="50">50분</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="tasksCard">
+    <h2>오늘 할 일</h2>
+    <div class="task-add">
+      <div class="field">
+        <label for="taskName">할 일</label>
+        <input type="text" id="taskName" placeholder="예: 수학 학원 숙제">
+      </div>
+      <div class="field mins">
+        <label for="taskMin">예상 시간(분)</label>
+        <input type="number" id="taskMin" placeholder="40" min="5" step="5">
+      </div>
+      <button class="btn-add" id="addBtn">추가</button>
+    </div>
+    <ul class="tasks" id="taskList"></ul>
+    <p class="empty-note" id="emptyNote">아직 추가한 할 일이 없어요.</p>
+    <button class="btn-main" id="buildBtn" disabled>시간표 만들기</button>
+  </div>
+
+  <div class="card" id="scheduleSection">
+    <h2>오늘의 시간표</h2>
+    <div id="warningBox"></div>
+    <div class="summary" id="summaryBox"></div>
+    <div class="timeline" id="timelineBox" style="margin-left:24px;"></div>
+  </div>
+
+  <div class="card" id="nowSection">
+    <div class="now-card">
+      <div class="eyebrow" id="nowEyebrow">지금은</div>
+      <div class="now-label" id="nowLabel">-</div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="now-meta">
+        <span id="nowRemain"></span>
+        <span id="nowClock"></span>
+      </div>
+    </div>
+  </div>
+
+  <button class="reset-link" id="resetBtn" style="display:none;">처음부터 다시 짜기</button>
+</div>
+
+<script>
+(function(){
+  var tasks = [];
+  var schedule = [];
+  var scheduleStartDate = null; // Date object anchoring the whole timeline
+  var tickHandle = null;
+
+  var startTimeEl = document.getElementById('startTime');
+  var bedTimeEl = document.getElementById('bedTime');
+  var blockLenEl = document.getElementById('blockLen');
+  var taskNameEl = document.getElementById('taskName');
+  var taskMinEl = document.getElementById('taskMin');
+  var addBtn = document.getElementById('addBtn');
+  var taskListEl = document.getElementById('taskList');
+  var emptyNote = document.getElementById('emptyNote');
+  var buildBtn = document.getElementById('buildBtn');
+  var scheduleSection = document.getElementById('scheduleSection');
+  var warningBox = document.getElementById('warningBox');
+  var summaryBox = document.getElementById('summaryBox');
+  var timelineBox = document.getElementById('timelineBox');
+  var nowSection = document.getElementById('nowSection');
+  var resetBtn = document.getElementById('resetBtn');
+
+  function pad(n){ return n < 10 ? '0'+n : ''+n; }
+  function fmt(d){ return pad(d.getHours())+':'+pad(d.getMinutes()); }
+
+  function now(){ return new Date(); }
+
+  (function initDefaultStart(){
+    var n = now();
+    startTimeEl.value = pad(n.getHours())+':'+pad(n.getMinutes());
+  })();
+
+  function parseTimeToday(str, baseDate){
+    var parts = str.split(':');
+    var d = new Date(baseDate);
+    d.setHours(parseInt(parts[0],10), parseInt(parts[1],10), 0, 0);
+    return d;
+  }
+
+  function renderTasks(){
+    taskListEl.innerHTML = '';
+    if(tasks.length === 0){
+      emptyNote.style.display = 'block';
+    } else {
+      emptyNote.style.display = 'none';
+    }
+    tasks.forEach(function(t, i){
+      var li = document.createElement('li');
+      var name = document.createElement('span');
+      name.className = 't-name';
+      name.textContent = t.name;
+      var min = document.createElement('span');
+      min.className = 't-min';
+      min.textContent = t.minutes + '분';
+      var del = document.createElement('button');
+      del.className = 'del';
+      del.textContent = '삭제';
+      del.addEventListener('click', function(){
+        tasks.splice(i,1);
+        renderTasks();
+        updateBuildBtn();
+      });
+      li.appendChild(name);
+      li.appendChild(min);
+      li.appendChild(del);
+      taskListEl.appendChild(li);
+    });
+  }
+
+  function updateBuildBtn(){
+    buildBtn.disabled = tasks.length === 0;
+  }
+
+  addBtn.addEventListener('click', function(){
+    var name = taskNameEl.value.trim();
+    var min = parseInt(taskMinEl.value, 10);
+    if(!name || !min || min <= 0) return;
+    tasks.push({name: name, minutes: min});
+    taskNameEl.value = '';
+    taskMinEl.value = '';
+    taskNameEl.focus();
+    renderTasks();
+    updateBuildBtn();
+  });
+
+  taskMinEl.addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){ addBtn.click(); }
+  });
+  taskNameEl.addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){ taskMinEl.focus(); }
+  });
+
+  function buildSchedule(){
+    var base = now();
+    var start = parseTimeToday(startTimeEl.value, base);
+    var bed = parseTimeToday(bedTimeEl.value, base);
+    if(bed <= start){ bed = new Date(bed.getTime() + 24*60*60*1000); }
+
+    var blockLen = parseInt(blockLenEl.value, 10);
+    var breakLen = blockLen === 25 ? 5 : 10;
+
+    var cursor = new Date(start);
+    var blocks = [];
+
+    tasks.forEach(function(task, idx){
+      var remaining = task.minutes;
+      while(remaining > 0){
+        var chunk = Math.min(blockLen, remaining);
+        var blockStart = new Date(cursor);
+        var blockEnd = new Date(cursor.getTime() + chunk*60000);
+        blocks.push({type:'study', label: task.name, start: blockStart, end: blockEnd});
+        cursor = blockEnd;
+        remaining -= chunk;
+        var moreLeftOverall = remaining > 0 || idx < tasks.length - 1;
+        if(moreLeftOverall){
+          var bStart = new Date(cursor);
+          var bEnd = new Date(cursor.getTime() + breakLen*60000);
+          blocks.push({type:'break', label:'쉬는 시간', start:bStart, end:bEnd});
+          cursor = bEnd;
+        }
+      }
+    });
+
+    return {blocks: blocks, start: start, end: cursor, bed: bed, blockLen: blockLen, breakLen: breakLen};
+  }
+
+  buildBtn.addEventListener('click', function(){
+    var result = buildSchedule();
+    schedule = result.blocks;
+    scheduleStartDate = result.start;
+
+    var totalStudy = 0, totalBreak = 0;
+    schedule.forEach(function(b){
+      var mins = (b.end - b.start)/60000;
+      if(b.type === 'study') totalStudy += mins; else totalBreak += mins;
+    });
+
+    warningBox.innerHTML = '';
+    if(result.end > result.bed){
+      var overBy = Math.round((result.end - result.bed)/60000);
+      var w = document.createElement('div');
+      w.className = 'warning';
+      w.textContent = '이대로면 목표 취침 시간보다 ' + overBy + '분 늦게 끝나요. 할 일을 줄이거나, 학원 숙제 양을 선생님과 상의해보는 것도 방법이에요.';
+      warningBox.appendChild(w);
+    }
+
+    summaryBox.innerHTML =
+      '<span>공부 시간 <b>' + Math.round(totalStudy) + '분</b></span>' +
+      '<span>쉬는 시간 <b>' + Math.round(totalBreak) + '분</b></span>' +
+      '<span>끝나는 시간 <b>' + fmt(result.end) + '</b></span>';
+
+    timelineBox.innerHTML = '';
+    schedule.forEach(function(b){
+      var row = document.createElement('div');
+      row.className = 'block ' + b.type;
+      row.dataset.start = b.start.getTime();
+      row.dataset.end = b.end.getTime();
+      var time = document.createElement('span');
+      time.className = 'time';
+      time.textContent = fmt(b.start) + ' – ' + fmt(b.end);
+      var label = document.createElement('span');
+      label.className = 'label';
+      label.textContent = b.label;
+      row.appendChild(time);
+      row.appendChild(label);
+      timelineBox.appendChild(row);
+    });
+
+    scheduleSection.style.display = 'block';
+    nowSection.style.display = 'block';
+    resetBtn.style.display = 'inline-block';
+    document.getElementById('tasksCard').style.display = 'none';
+    document.getElementById('setupCard').style.display = 'none';
+
+    startTick();
+    scheduleSection.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+
+  function startTick(){
+    if(tickHandle) clearInterval(tickHandle);
+    tick();
+    tickHandle = setInterval(tick, 1000);
+  }
+
+  function tick(){
+    var n = now();
+    var rows = timelineBox.querySelectorAll('.block');
+    var current = null;
+    rows.forEach(function(row){
+      var s = parseInt(row.dataset.start,10);
+      var e = parseInt(row.dataset.end,10);
+      if(n.getTime() >= s && n.getTime() < e){
+        row.classList.add('now');
+        current = row;
+      } else {
+        row.classList.remove('now');
+      }
+    });
+
+    var nowEyebrow = document.getElementById('nowEyebrow');
+    var nowLabel = document.getElementById('nowLabel');
+    var nowRemain = document.getElementById('nowRemain');
+    var nowClock = document.getElementById('nowClock');
+    var progressFill = document.getElementById('progressFill');
+
+    nowClock.textContent = '지금 ' + fmt(n);
+
+    if(current){
+      var s = parseInt(current.dataset.start,10);
+      var e = parseInt(current.dataset.end,10);
+      var total = e - s;
+      var elapsed = n.getTime() - s;
+      var pct = Math.min(100, Math.max(0, (elapsed/total)*100));
+      progressFill.style.width = pct + '%';
+      var remainMin = Math.ceil((e - n.getTime())/60000);
+      var label = current.classList.contains('break') ? '쉬는 시간' : current.querySelector('.label').textContent;
+      nowEyebrow.textContent = current.classList.contains('break') ? '지금은 쉬는 시간이에요' : '지금 할 일';
+      nowLabel.textContent = label;
+      nowRemain.textContent = remainMin + '분 남음';
+    } else if(schedule.length && n < schedule[0].start){
+      nowEyebrow.textContent = '곧 시작해요';
+      nowLabel.textContent = schedule[0].label;
+      progressFill.style.width = '0%';
+      var untilStart = Math.ceil((schedule[0].start - n.getTime())/60000);
+      nowRemain.textContent = untilStart + '분 후 시작';
+    } else if(schedule.length && n >= schedule[schedule.length-1].end){
+      nowEyebrow.textContent = '오늘 계획';
+      nowLabel.textContent = '다 끝났어요';
+      progressFill.style.width = '100%';
+      nowRemain.textContent = '수고했어요';
+      clearInterval(tickHandle);
+    }
+  }
+
+  resetBtn.addEventListener('click', function(){
+    if(tickHandle) clearInterval(tickHandle);
+    tasks = [];
+    schedule = [];
+    renderTasks();
+    updateBuildBtn();
+    scheduleSection.style.display = 'none';
+    nowSection.style.display = 'none';
+    resetBtn.style.display = 'none';
+    document.getElementById('tasksCard').style.display = 'block';
+    document.getElementById('setupCard').style.display = 'block';
+    var n = now();
+    startTimeEl.value = pad(n.getHours())+':'+pad(n.getMinutes());
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+
+  renderTasks();
+  updateBuildBtn();
+})();
+</script>
+</body>
+</html>
